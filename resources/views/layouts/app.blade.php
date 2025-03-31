@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +9,7 @@
     <title>{{ config('app.name', 'Laravel') }}</title>
 
     <!-- PWA  -->
-    <meta name="theme-color" content="#ffffff"/>
+    <meta name="theme-color" content="#ffffff" />
     <link rel="manifest" href="{{ asset('manifest.json') }}">
     <link rel="apple-touch-icon" href="{{ asset('icons/icon-192x192.png') }}">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -21,7 +22,15 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- Add these after your existing PWA meta tags -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="apple-touch-startup-image" href="{{ asset('icons/splash-640x1136.png') }}"
+        media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)">
+    <meta name="msapplication-TileImage" content="{{ asset('icons/icon-144x144.png') }}">
+    <meta name="msapplication-TileColor" content="#ffffff">
 </head>
+
 <body class="font-sans antialiased">
     <div class="min-h-screen bg-gray-100">
         <livewire:layout.navigation />
@@ -42,6 +51,25 @@
     </div>
 
     <script>
+        // Add this before the existing service worker registration code
+        window.addEventListener('load', async () => {
+            if ('serviceWorker' in navigator) {
+                try {
+                    // Log manifest detection
+                    const manifestElement = document.querySelector('link[rel="manifest"]');
+                    console.log('Manifest element:', manifestElement);
+
+                    if (manifestElement) {
+                        const response = await fetch(manifestElement.href);
+                        const manifest = await response.json();
+                        console.log('Manifest content:', manifest);
+                    }
+                } catch (error) {
+                    console.error('Error loading manifest:', error);
+                }
+            }
+        });
+
         // Register Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
@@ -84,4 +112,5 @@
     </script>
     <livewire:components.pwa-install-button />
 </body>
+
 </html>
